@@ -1,0 +1,47 @@
+# ============================================
+# REUSABLE WORKFLOW: Test
+# Pode ser chamado por outros workflows
+# ============================================
+name: 🔄 Reusable Test
+
+# ============================================
+# WORKFLOW_CALL: Torna este workflow reutilizável
+# Diferente de "on: push", este workflow só executa
+# quando chamado por outro workflow
+# ============================================
+on:
+  workflow_call:
+    # Parâmetros que quem chama pode passar
+    inputs:
+      node-version:
+        description: 'Versão do Node.js'
+        required: false
+        type: string
+        default: '20'
+
+# ============================================
+# JOBS: O que este workflow faz
+# ============================================
+jobs:
+  test:
+    name: 🧪 Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+      
+      - name: 📦 Install dependencies
+        working-directory: app
+        run: npm ci
+      
+      - name: 🧪 Run tests
+        working-directory: app
+        run: npm test
